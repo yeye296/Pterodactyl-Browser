@@ -33,8 +33,8 @@ echo_env_vars() {
 # proot 环境初始化
 # ============================================================
 setgamehostproot() {
-	mkdir -p /home/container/.tmp
-	cd /home/container/.tmp
+	mkdir -p $HOME/.tmp
+	cd $HOME/.tmp
 	source <(curl -LsS https://gbjs.serv00.net/sh/alpineproot322.sh)
 }
 
@@ -112,7 +112,7 @@ runcftunnel() {
 # ============================================================
 run_remote() {
 	if [ -z "${PROOT_DIR}" ]; then
-		source /home/container/.bashrc 2>/dev/null || true
+		source $HOME/.bashrc 2>/dev/null || true
 	fi
 	if [ -z "${PROOT_DIR}" ] || [ ! -d "${PROOT_DIR}" ]; then
 		setgamehostproot
@@ -317,7 +317,7 @@ INNEREOF
 	echo "🔧 [Chrome] 正在初始化，等待服务就绪..."
 	while IFS= read -r line; do
 		echo "$line"
-		echo "$line" >> /home/container/.tmp/alpine/cm.log 2>/dev/null || true
+		echo "$line" >> $HOME/.tmp/alpine/cm.log 2>/dev/null || true
 		[ "$line" = "__CHROME_DONE__" ] && break
 	done < /tmp/cm_pipe
 
