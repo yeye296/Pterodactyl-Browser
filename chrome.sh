@@ -222,6 +222,7 @@ start_services() {
   # 启动 Chromium（无 GPU 容器优化参数）
   export SERVICECMD="chromium-browser \
     --no-sandbox \
+	--no-zygote \
 	--test-type \
     --start-maximized \
     --window-size=\${VNC_W},\${VNC_H} \
@@ -233,18 +234,18 @@ start_services() {
     --memory-pressure-off \
     --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
 	--disable-ipc-flooding-protection \
-    --renderer-process-limit=4 \
+    --renderer-process-limit=2 \
 	--in-process-gpu \
 	--mute-audio \
-    --disable-audio-output \
     --disable-breakpad \
+	--disable-crashpad \
     --disable-crash-reporter \
 	--no-first-run \
     --disable-infobars \
     --hide-crash-restore-bubble \
     --disable-session-crashed-bubble \
     --restore-last-session \
-    --disable-features=Translate,BackForwardCache \
+    --disable-features=Translate,BackForwardCache,AudioServiceOutOfProcess \
     --js-flags=--max-old-space-size=1024"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
