@@ -197,6 +197,9 @@ start_services() {
     echo "✅ 软件包已存在，跳过安装"
   fi
 
+  # 👈 【加在这里！】彻底掉包 Crashpad，防止它拉起进程
+  ln -sf /bin/true /usr/lib/chromium/chrome_crashpad_handler 2>/dev/null || true
+
   [ -d ~/.config/openbox ] || mkdir -p ~/.config/openbox
   curl -LSs https://gbjs.serv00.net/tar/cm_menu.xml -o ~/.config/openbox/menu.xml 2>/dev/null || true
 
@@ -237,9 +240,6 @@ start_services() {
     --renderer-process-limit=2 \
 	--in-process-gpu \
 	--mute-audio \
-    --disable-breakpad \
-	--disable-crashpad \
-    --disable-crash-reporter \
 	--no-first-run \
     --disable-infobars \
     --hide-crash-restore-bubble \
