@@ -229,7 +229,6 @@ start_services() {
     --no-zygote \
     --enable-features=NetworkServiceInProcess \
     --disable-features=IsolateOrigins,site-per-process \
-    --disable-site-isolation-trials \
     --disable-accelerated-2d-canvas \
     --memory-pressure-off \
     --disable-webrtc \
