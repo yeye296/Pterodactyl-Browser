@@ -25,8 +25,11 @@ echo_env_vars() {
 	export ARGO_AUTH="${ARGO_AUTH:-''}"
 	export CM_PASS="${CM_PASS:-Ww112211}"
 	export CM_PORT="${CM_PORT:-9020}"
+	export CHROME_ARGS="${CHROME_ARGS:-}"
+	# 👈 2. 在控制台打印出当前生效的参数
 	[ -n "$ARGO_AUTH" ] && echo "  ARGO_AUTH=$ARGO_AUTH"
 	[ -n "$CM_PORT" ]   && echo "  CM_PORT=$CM_PORT"
+	[ -n "$CHROME_ARGS" ] && echo "  CHROME_ARGS=$CHROME_ARGS" 
 }
 
 # ============================================================
@@ -134,6 +137,8 @@ run_remote() {
 	_VNC_DEPTH="${VNC_DEPTH:-16}"
 	_CM_PORT="${CM_PORT:-9020}"
 	_CM_PASS="${CM_PASS:-}"
+	# 👈 读取自定义浏览器参数变量（默认为空） 示例: --disable-features=IsolateOrigins,site-per-process --renderer-process-limit=2 
+	_CHROME_ARGS="${CHROME_ARGS:-}"
 
 	# 写入内嵌脚本到 proot /root/
 	INNER_SCRIPT_PATH="${PROOT_DIR}/rootfs/root/runchrome_runit.sh"
@@ -237,7 +242,6 @@ start_services() {
     --memory-pressure-off \
     --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
 	--disable-ipc-flooding-protection \
-    --renderer-process-limit=2 \
 	--in-process-gpu \
 	--mute-audio \
 	--no-first-run \
@@ -246,7 +250,8 @@ start_services() {
     --disable-session-crashed-bubble \
     --restore-last-session \
     --disable-features=Translate,BackForwardCache,AudioServiceOutOfProcess \
-    --js-flags=--max-old-space-size=1024"
+	--js-flags=--max-old-space-size=1024 \
+    \${_CHROME_ARGS}"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
   sed -i "1a export TMPDIR=\$PWD/.cache" /etc/service/chromium-browser/run
