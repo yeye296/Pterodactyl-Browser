@@ -235,6 +235,10 @@ start_services() {
 	--disable-ipc-flooding-protection \
     --renderer-process-limit=4 \
 	--in-process-gpu \
+	--mute-audio \
+    --disable-audio-output \
+    --disable-breakpad \
+    --disable-crash-reporter \
 	--no-first-run \
     --disable-infobars \
     --hide-crash-restore-bubble \
