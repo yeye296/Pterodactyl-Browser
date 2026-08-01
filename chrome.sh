@@ -233,7 +233,7 @@ start_services() {
     --memory-pressure-off \
     --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
 	--disable-ipc-flooding-protection \
-    --renderer-process-limit=2 \
+    --renderer-process-limit=4 \
 	--in-process-gpu \
 	--no-first-run \
     --disable-infobars \
