@@ -182,6 +182,8 @@ enable_autoconnect() {
 
 start_services() {
   echo "🚀 启动 Chromium + TigerVNC + Openbox..."
+  # 突破 proot 容器的文件句柄限制（防止链接数爆掉导致新标签页 Crashed）
+  ulimit -n 65535 2>/dev/null || true
 
   if ! command -v chromium-browser >/dev/null 2>&1; then
     apk update
@@ -230,17 +232,20 @@ start_services() {
     --disable-accelerated-2d-canvas \
     --memory-pressure-off \
     --disable-webrtc \
+	--disable-ipc-flooding-protection \
 	--no-first-run \
     --disable-infobars \
     --hide-crash-restore-bubble \
     --disable-session-crashed-bubble \
     --restore-last-session \
-    --disable-features=Translate,BackForwardCache \
+    --disable-features=Translate,BackForwardCache,IsolateOrigins \
     --js-flags=--max-old-space-size=2048"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
   sed -i "1a export TMPDIR=\$PWD/.cache" /etc/service/chromium-browser/run
   sed -i "1a export DISPLAY=:1" /etc/service/chromium-browser/run
+  # 👈 核心补强：确保 runit 后台拉起 Chromium 时也带有 65535 的文件句柄上限！
+  sed -i "1a ulimit -n 65535 2>/dev/null || true" /etc/service/chromium-browser/run
 
   basedir=\$(pwd)
 
