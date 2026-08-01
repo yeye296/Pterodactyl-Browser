@@ -231,7 +231,7 @@ start_services() {
     --disable-background-networking \
     --disable-accelerated-2d-canvas \
     --memory-pressure-off \
-    --disable-webrtc \
+    --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
 	--disable-ipc-flooding-protection \
     --renderer-process-limit=2 \
 	--in-process-gpu \
