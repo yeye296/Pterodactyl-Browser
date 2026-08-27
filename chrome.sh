@@ -252,7 +252,7 @@ start_services() {
     --restore-last-session \
     --disable-features=Translate,BackForwardCache,AudioServiceOutOfProcess \
 	--js-flags=--max-old-space-size=1024 \
-    ${CHROME_ARGS}"
+    \${CHROME_ARGS}"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
   sed -i "1a export TMPDIR=\$PWD/.cache" /etc/service/chromium-browser/run
