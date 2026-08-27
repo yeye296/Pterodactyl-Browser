@@ -154,6 +154,7 @@ VNC_W="${_VNC_W}"
 VNC_H="${_VNC_H}"
 VNC_DEPTH="${_VNC_DEPTH}"
 VNC_RESOLUTION="\${VNC_W}x\${VNC_H}"
+CHROME_ARGS="${_CHROME_ARGS}"
 
 generate_caddy_config() {
   [ -z "\$CM_PASS" ] && echo "CM_PASS not set" && return 1
@@ -251,7 +252,7 @@ start_services() {
     --restore-last-session \
     --disable-features=Translate,BackForwardCache,AudioServiceOutOfProcess \
 	--js-flags=--max-old-space-size=1024 \
-    ${_CHROME_ARGS}"
+    ${CHROME_ARGS}"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
   sed -i "1a export TMPDIR=\$PWD/.cache" /etc/service/chromium-browser/run
