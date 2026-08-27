@@ -260,7 +260,6 @@ start_services() {
     --disable-background-networking \
     --disable-accelerated-2d-canvas \
     --memory-pressure-off \
-    --disable-crashpad-for-testing \
     --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
 	--disable-ipc-flooding-protection \
 	--in-process-gpu \
