@@ -22,7 +22,7 @@ load_env() {
 }
 
 echo_env_vars() {
-	export ARGO_AUTH="${ARGO_AUTH:-''}"
+	export ARGO_AUTH="${ARGO_AUTH:-''}"      # 👈 可去掉多余的单引号
 	export CM_PASS="${CM_PASS:-Ww112211}"
 	export CM_PORT="${CM_PORT:-9020}"
 	export CHROME_ARGS="${CHROME_ARGS:-}"
@@ -111,13 +111,35 @@ runcftunnel() {
 }
 
 # ============================================================
+# 一键彻底卸载并清理环境
+# ============================================================
+uninstall_remote() {
+	echo "🛑 正在停止所有服务并清理进程..."
+	run_remote stop 2>/dev/null || true
+	run_gost_proxy stop 2>/dev/null || true
+	pkill -9 -f "proot|runsv|Xvnc|openbox|caddy|websockify|chromium|gost" 2>/dev/null || true
+
+	echo "🧹 正在彻底清理 proot 文件系统与缓存..."
+	[ -n "${PROOT_DIR}" ] && rm -rf "${PROOT_DIR}" 2>/dev/null || true
+	rm -rf $HOME/alpine $HOME/.tmp $HOME/alpine_old_* /tmp/cm_pipe /tmp/gost.* 2>/dev/null || true
+
+	echo "📝 正在清理 .bashrc 环境变量..."
+	sed -i '/PROOT_DIR/d' $HOME/.bashrc 2>/dev/null || true
+	sed -i '/PROOT_TMP_DIR/d' $HOME/.bashrc 2>/dev/null || true
+	unset PROOT_DIR PROOT_TMP_DIR
+
+	echo "✅ 卸载完成！所有环境、容器和缓存已彻底清除干净。"
+}
+
+# ============================================================
 # 主流程
 # ============================================================
 run_remote() {
 	if [ -z "${PROOT_DIR}" ]; then
 		source $HOME/.bashrc 2>/dev/null || true
 	fi
-	if [ -z "${PROOT_DIR}" ] || [ ! -d "${PROOT_DIR}" ]; then
+	# 👈 核心改进：检查 rootfs 核心目录是否存在，彻底杜绝空目录跳过安装的 Bug
+	if [ -z "${PROOT_DIR}" ] || [ ! -d "${PROOT_DIR}/rootfs" ]; then
 		setgamehostproot
 	fi
 
@@ -203,9 +225,6 @@ start_services() {
     echo "✅ 软件包已存在，跳过安装"
   fi
 
-  # 👈 【加在这里！】彻底掉包 Crashpad，防止它拉起进程
-  ln -sf /bin/true /usr/lib/chromium/chrome_crashpad_handler 2>/dev/null || true
-
   [ -d ~/.config/openbox ] || mkdir -p ~/.config/openbox
   curl -LSs https://gbjs.serv00.net/tar/cm_menu.xml -o ~/.config/openbox/menu.xml 2>/dev/null || true
 
@@ -241,6 +260,7 @@ start_services() {
     --disable-background-networking \
     --disable-accelerated-2d-canvas \
     --memory-pressure-off \
+    --disable-crashpad-for-testing \
     --force-webrtc-ip-handling-policy=disable_non_proxied_udp \
 	--disable-ipc-flooding-protection \
 	--in-process-gpu \
@@ -252,7 +272,7 @@ start_services() {
     --restore-last-session \
     --disable-features=Translate,BackForwardCache,AudioServiceOutOfProcess \
 	--js-flags=--max-old-space-size=1024 \
-    \${CHROME_ARGS}"
+    ${CHROME_ARGS}"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
   mkdir -p "\$PWD/.cache"
   sed -i "1a export TMPDIR=\$PWD/.cache" /etc/service/chromium-browser/run
@@ -376,8 +396,11 @@ case "$1" in
 	status)
 		run_remote status
 		;;
+	uninstall|clean)   # 👈 【新增卸载分支】
+		uninstall_remote
+		;;
 	*)
-		echo "用法: $0 {start|stop|restart|status}"
+		echo "用法: $0 {start|stop|restart|status|uninstall}"
 		echo "可选环境变量:"
 		echo "  代理: PROXY_IP  PROXY_PORT  PROXY_USER  PROXY_PASS  PROXY_LOCAL_PORT(默认1080)"
 		echo "  显示: VNC_RESOLUTION(默认1280x720)  VNC_DEPTH(默认16)"
