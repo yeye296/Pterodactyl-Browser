@@ -229,7 +229,7 @@ start_services() {
   curl -LSs https://gbjs.serv00.net/tar/cm_menu.xml -o ~/.config/openbox/menu.xml 2>/dev/null || true
 
   # 启动 TigerVNC（降低分辨率和色深提升流畅度）
-  export SERVICECMD="Xvnc :1 -geometry \${VNC_RESOLUTION} -depth \${VNC_DEPTH} -SecurityTypes None"
+  export SERVICECMD="Xvnc :1 -geometry \${VNC_RESOLUTION} -depth \${VNC_DEPTH} -SecurityTypes None -rfbport 49901"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s start
 
   export DISPLAY=:1
