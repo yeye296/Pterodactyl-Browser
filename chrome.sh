@@ -194,7 +194,7 @@ generate_caddy_config() {
   root * \$1/novnc
   file_server
   handle_path /websockify* {
-    reverse_proxy unix//tmp/novnc_ws.sock
+    reverse_proxy localhost:49902
   }
 }
 EOF
@@ -305,11 +305,11 @@ start_services() {
   wwwdir=\$(pwd)
 
   if [ -z "\$CM_PASS" ]; then
-    export SERVICECMD="websockify --web \${wwwdir} 0.0.0.0:\${CM_PORT} --unix-target=/tmp/.X11-unix/X1"
+    export SERVICECMD="websockify --web \${wwwdir} \${CM_PORT} localhost:49901"
     (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
     echo "✅ noVNC 已就绪，访问: http://0.0.0.0:\${CM_PORT}/index.html"
   else
-    export SERVICECMD="websockify --unix-listen=/tmp/novnc_ws.sock --unix-listen-mode=0777 --unix-target=/tmp/.X11-unix/X1"
+    export SERVICECMD="websockify 49902 localhost:49901"
     (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
     apk add --no-cache caddy
     generate_caddy_config \$basedir
