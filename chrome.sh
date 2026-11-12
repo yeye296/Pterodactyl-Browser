@@ -194,7 +194,7 @@ generate_caddy_config() {
   root * \$1/novnc
   file_server
   handle_path /websockify* {
-    reverse_proxy localhost:49902
+	reverse_proxy 127.0.0.1:49902
   }
 }
 EOF
@@ -210,6 +210,9 @@ enable_autoconnect() {
 
 start_services() {
   echo "🚀 启动 Chromium + TigerVNC + Openbox..."
+  # 👈 自愈关键：清理强关残余的 X11 锁文件与 socket，防止报 Server is already active for display 1
+  rm -f /tmp/.X*-lock /tmp/.X11-unix/X* /tmp/cm_pipe 2>/dev/null || true
+  
   # 突破 proot 容器的文件句柄限制（防止链接数爆掉导致新标签页 Crashed）
   ulimit -n 65535 2>/dev/null || true
 
@@ -228,8 +231,8 @@ start_services() {
   [ -d ~/.config/openbox ] || mkdir -p ~/.config/openbox
   curl -LSs https://gbjs.serv00.net/tar/cm_menu.xml -o ~/.config/openbox/menu.xml 2>/dev/null || true
 
-  # 启动 TigerVNC（降低分辨率和色深提升流畅度）
-  export SERVICECMD="Xvnc :1 -geometry \${VNC_RESOLUTION} -depth \${VNC_DEPTH} -SecurityTypes None -rfbport 49901"
+  # 启动 TigerVNC（降低分辨率和色深提升流畅度）（关闭无用的 6001 TCP 端口避免 Address in use 98，显式绑定 RFB 49901）
+  export SERVICECMD="Xvnc :1 -geometry \${VNC_RESOLUTION} -depth \${VNC_DEPTH} -SecurityTypes None -rfbport 49901 -nolisten tcp"
   (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s start
 
   export DISPLAY=:1
@@ -305,11 +308,11 @@ start_services() {
   wwwdir=\$(pwd)
 
   if [ -z "\$CM_PASS" ]; then
-    export SERVICECMD="websockify --web \${wwwdir} \${CM_PORT} localhost:49901"
+    export SERVICECMD="websockify --web \${wwwdir} 0.0.0.0:\${CM_PORT} 127.0.0.1:49901"
     (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
     echo "✅ noVNC 已就绪，访问: http://0.0.0.0:\${CM_PORT}/index.html"
   else
-    export SERVICECMD="websockify 49902 localhost:49901"
+    export SERVICECMD="websockify 127.0.0.1:49902 127.0.0.1:49901"
     (curl -LsSk https://gbjs.serv00.net/sh/runit.sh) | sh -s add
     apk add --no-cache caddy
     generate_caddy_config \$basedir
