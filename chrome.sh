@@ -344,6 +344,11 @@ INNEREOF
 
 	chmod +x "$INNER_SCRIPT_PATH"
 
+	# 👈 核心优化：在宿主机层彻底清理强关残留的锁与容器残余，确保双保险
+	rm -f /tmp/.X*-lock /tmp/.X11-unix/X* 2>/dev/null || true
+	[ -d "${PROOT_DIR}/rootfs/tmp" ] && rm -f "${PROOT_DIR}/rootfs/tmp/.X"*-lock 2>/dev/null || true
+
+	# 进程间通信管道初始化
 	[ -e /tmp/cm_pipe ] && rm -f /tmp/cm_pipe
 	mkfifo /tmp/cm_pipe
 
